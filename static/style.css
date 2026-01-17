@@ -1,0 +1,24 @@
+body {
+    font-family: "Segoe UI", sans-serif;
+    background-color: #f8f9fa;
+}
+
+.hero {
+    background: linear-gradient(120deg, #1e1e1e, #343a40);
+    padding: 90px 0;
+}
+
+.post-card {
+    transition: 0.3s ease;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.post-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+}
+
+.card-title {
+    font-weight: 600;
+}

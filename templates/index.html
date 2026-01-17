@@ -1,0 +1,192 @@
+{%extends 'base.html'%}
+{%load static%}
+
+
+{%block content%}
+
+{% block commnets %}
+  {% include 'comment_view.html' %}
+{% endblock %}
+
+<!--_______________________________________________________________________________________-->
+<!--            asosoi content                                                       -->
+<!--________________________________________________________________________________________-->
+<div class="main-wrapper">
+
+  <section class="feed">
+
+        <!-- ******************post yozish ocnlic*******************************-->
+            <div class="create-post-card animate__animated animate__fadeInDown" onclick="openModal()">
+              <img src="https://i.pravatar.cc/150?u=9" class="avatar-small">
+              <div class="fake-input">Bugun nima yangilik? Fikringizni ulashing...</div>
+              <i class="bi bi-image" style="font-size: 22px; color: var(--primary);"></i>
+            </div>
+
+        <!--  -------------------------------------------------------------------  -->
+
+
+
+        <!--*********************************POST***************************************-->
+            {% for post in posts %}
+                <article class="post-card">
+
+                  <div class="post-img-container">
+                    <span class="post-tag">Texnologiya</span>
+                     {% if post.image %}
+                        <img src="{{ post.image.url }}" alt="{{ post.title }}" style="width:100%; border-radius: 12px; margin-bottom: 12px;">
+                      {%else%}
+
+                    {% endif %}
+                  </div>
+
+                  <div class="post-content">
+
+                    <h2 class="post-title">{{ post.title }}</h2>
+                    <p class="post-excerpt">{{ post.description }}</p>
+
+                {% for comment in post.comments.all %}
+                        {% if not comment.is_blocked %}
+
+                    <div class="comments-list">
+
+
+
+
+                      <div class="comment-item">
+                        <img src="https://i.pravatar.cc/100?u=2" style="width:24px; height:24px; border-radius:50%;">
+                        <div>
+                          <b>@{{ comment.user.username }}</b>
+                          <div class="comment-text">{{ comment.text }}</div>
+                             <span style="color: gray; font-size: 12px;">{{ comment.created_at|timesince }} oldin</span>
+                        </div>
+                      </div>
+                    </div>
+
+
+                {%endif%}
+                      {%endfor%}
+
+                    <div class="post-footer-actions">
+
+                      <form  method="post"  style="width: 100%;">
+                        {% csrf_token %}
+                        <div class="comment-wrapper">
+                          <div class="comment-input-container">
+                              <input type="hidden" name="post_id" value="{{ post.id }}">
+                            <input type="text" name="comment_text" placeholder="Fikringizni yozing...">
+                            <button name="comment_submit" type="submit" class="send-btn">
+                              <i class="bi bi-send-fill"></i>
+                            </button>
+                          </div>
+                        </div>
+                      </form>
+
+                      <div class="author-meta-bottom">
+                        <div class="interaction-bar">
+                          <div class="int-item liked">
+
+                              <form method="POST" action="{% url 'like_post_ajax'%}">
+                                    {% csrf_token %}
+                                  <button type="button"
+                                        class="like-btn"
+                                        data-id="{{ post.id }}"
+                                        style="background:none;border:none;cursor:pointer">
+
+                                        <i class="bi {% if post.is_liked %}bi-heart-fill{% else %}bi-heart{% endif %}"
+                                           style="color:{% if post.is_liked %}red{% else %}gray{% endif %};"></i>
+
+                                        <span class="like-count">{{ post.likes.count }}</span>
+                                  </button>
+
+
+                              </form>
+
+                          </div>
+                                <!--*************************** Kommentar ochish tugmasi -->
+                            <button class="int-item" onclick="openComments('{{ post.id }}', '{{ post.comments.count }}')">
+                                <i class="bi bi-chat-left-text"></i>
+                                <span id="comment-count-{{ post.id }}">{{ post.comments.count }}</span>
+                            </button>
+            <!-- ---------------------------------------------------             -->
+                          <div class="int-item"><i class="bi bi-chat-left-text"></i> {{ post.comments.count }}</div>
+                          <div class="int-item"><i class="bi bi-share"></i> Ulashish</div>
+                        </div>
+                        <div style="color: var(--text-light); font-size: 14px; font-weight: 600;">
+                          <i class="bi bi-eye"></i> {{ post.views }} ko'rildi
+                        </div>
+                      </div>
+
+                    </div>
+
+                  </div>
+
+                </article>
+            {% endfor %}
+        <!--____________________________________________________________________________-->
+
+
+  </section>
+
+ {% block sidebar %}
+  {% include 'saidbar.html' %}
+{% endblock %}
+</div>
+<!--##########################################################################################-->
+
+
+
+<!--_______________________________________________________________________________________-->
+<!--                           FOOTER                                                       -->
+<!--________________________________________________________________________________________-->
+<footer style="background:white; border-top:1px solid var(--border); padding:40px 0; text-align:center;">
+    <p style="color:var(--text-light)">© 2026 DayBlog — Ma'lumot va Tajriba Almashish Markazi</p>
+</footer>
+<!--##########################################################################################-->
+
+
+
+<!--_______________________________________________________________________________________-->
+<!--                      Post qoshish uchun modal                                         -->
+<!--________________________________________________________________________________________-->
+<div class="modal-overlay" id="postModal">
+  <form action="" method="post"  enctype="multipart/form-data">
+    {%csrf_token%}
+  <div class="modal-content">
+
+    <i class="bi bi-x-lg close-modal" onclick="closeModal()"></i>
+    <h2 style="margin-top:0">Yangi post yaratish</h2>
+
+    <input type="text" name="title" placeholder="Sarlavha..." style="width:100%; padding:12px; border-radius:12px; border:1px solid #ddd; outline:none;">
+
+    <textarea name="description" placeholder="Nimalar haqida yozmoqchisiz?"></textarea>
+
+
+    <div style="display:flex; gap:10px;">
+        <!-- Rasm upload button -->
+    <label for="image-upload" class="custom-file-upload">
+        <i class="bi bi-image"></i> Rasm yuklash
+    </label>
+    <input id="image-upload" type="file" name="image">
+
+
+        <button type="submit" name="post_submit" style="flex:1; background:var(--primary); color:white; border:none; padding:15px; border-radius:15px; font-weight:700; cursor:pointer;">Chop etish</button>
+    </div>
+
+
+  </div>
+
+  </form>
+
+</div>
+
+
+<!--##########################################################################################-->
+<!--_______________________________________________________________________________________-->
+
+
+{%endblock%}
+
+
+
+
+
